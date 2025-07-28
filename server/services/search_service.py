@@ -5,7 +5,7 @@ import trafilatura
 settings = Settings()
 tavily_client = TavilyClient(api_key=settings.TAVILY_API_KEY)
 
-class SearchService():
+class SearchService:
     def web_search(self, query: str):
         try:
             results=[]
@@ -16,11 +16,13 @@ class SearchService():
           
                 downloaded = trafilatura.fetch_url(result.get("url"))
                 content = trafilatura.extract(downloaded, include_comments = False)
-                results.append({
-                    "title": result.get("title", ""),
-                    "url": result.get("url", ''),
-                    "content": content or "",
-                })
+                results.append(
+                    {
+                        "title": result.get("title", ""),
+                        "url": result.get("url", ""),
+                        "content": content or "",
+                    }
+                )
 
                 
             return results    
