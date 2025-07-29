@@ -6,7 +6,7 @@ settings = Settings()
 class LLMService:
     def __init__(self):
         genai.configure(api_key=settings.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel("gemini-2.0-flash")
+        self.model = genai.GenerativeModel("gemini-2.5-flash")
 
     def generate_response(self, query: str, search_results: list[dict]):
         #source1 <url>
