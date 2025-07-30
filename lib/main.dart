@@ -18,9 +18,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.submitButton),
         scaffoldBackgroundColor: AppColors.background,
-        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+        textTheme: GoogleFonts.interTextTheme(
+          ThemeData.dark().textTheme.copyWith(
+            bodyMedium: const TextStyle(
+              fontSize: 15,
+              color: AppColors.whiteColor,
+            ),
+          ),
+        ),
       ),
-      home: const HomePage(),
+      home: HomePage(),
     );
   }
 }
