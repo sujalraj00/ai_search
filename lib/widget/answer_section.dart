@@ -1,46 +1,42 @@
 import 'package:ai_search/services/chat_web_service.dart';
+import 'package:ai_search/services/agent_service.dart';
 import 'package:ai_search/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class AnswerSection extends StatefulWidget {
-  const AnswerSection({super.key});
+  final bool isAgentMode;
+  final AgentService? agentService;
+  final String question;
+
+  const AnswerSection({
+    super.key,
+    this.isAgentMode = false,
+    this.agentService,
+    this.question = '',
+  });
 
   @override
   State<AnswerSection> createState() => _AnswerSectionState();
 }
 
 class _AnswerSectionState extends State<AnswerSection> {
-  String fullResponse = '''
-  As of the end of Day 1 in the fourth Test match between India and Australia, the score stands at **Australia 311/6**. The match is being held at the Melbourne Cricket Ground (MCG) on December 26, 2024.
-
-  ## Match Overview
-  - **Toss**: Australia won the toss and opted to bat first.
-  - **Top Performers**:
-    - **Steve Smith** is currently unbeaten on **68 runs** from **111 balls**.
-    - **Sam Konstas**, making his Test debut, scored a significant **60 runs** from **65 balls**, contributing to a strong start for Australia.
-    - Other notable contributions include Usman Khawaja and Marnus Labuschagne, both adding valuable runs to the total.
-
-  ## Session Highlights
-  - In the first session, Australia reached **112 runs for the loss of one wicket**, with Konstas and Khawaja building an impressive opening partnership of **89 runs** before Konstas was dismissed by Ravindra Jadeja.
-  - After lunch, Australia maintained their momentum but faced a collapse as Jasprit Bumrah struck back, taking crucial wickets that brought India back into contention. Australia went from a strong position of **223/2** to **263/5** at one point, losing three wickets for just nine runs.
-
-  ## Bowling Performance
-  - Indian bowlers had mixed success throughout the day. While Bumrah was effective in the latter stages, picking up key wickets, Jadeja also contributed by taking the first wicket of Konstas.
-  - Other bowlers like Akash Deep and Washington Sundar chipped in with one wicket each, helping to restrict Australia's scoring after a dominant start.
-
-  ## Current Situation
-  As play concluded for the day, Australia stood at **311/6**, with Steve Smith holding firm as India looks to capitalize on their late breakthroughs on Day 2. The match remains finely balanced, with both teams having opportunities to seize control as they progress through this critical Test match in the Border-Gavaskar Trophy series[1][2][3][5].
-  ''';
-
-  // String fullResponse = "";
+  String fullResponse = '';
   bool isLoading = true;
+  bool _isAgentProcessing = false;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    if (widget.isAgentMode && widget.agentService != null) {
+      _handleAgentQuery();
+    } else {
+      _handleRegularChat();
+    }
+  }
+
+  void _handleRegularChat() {
     ChatWebService().contentStream.listen((data) {
       if (isLoading) {
         fullResponse = "";
@@ -52,20 +48,73 @@ class _AnswerSectionState extends State<AnswerSection> {
     });
   }
 
+  Future<void> _handleAgentQuery() async {
+    if (widget.agentService == null) return;
+
+    setState(() {
+      _isAgentProcessing = true;
+      isLoading = true;
+    });
+
+    try {
+      final response = await widget.agentService!.handleAgentQuery(
+        widget.question,
+      );
+      setState(() {
+        fullResponse = response;
+        isLoading = false;
+        _isAgentProcessing = false;
+      });
+    } catch (e) {
+      setState(() {
+        fullResponse = "Sorry, I encountered an error: $e";
+        isLoading = false;
+        _isAgentProcessing = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Perplexity',
+          widget.isAgentMode ? 'AI Agent Response' : 'Perplexity',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        // const SizedBox(height: 16,),
+        SizedBox(height: 16),
+        if (widget.isAgentMode && _isAgentProcessing)
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.cardColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.submitButton,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Text(
+                  'AI Agent is processing your request...',
+                  style: TextStyle(fontSize: 16, color: AppColors.textGrey),
+                ),
+              ],
+            ),
+          ),
         Skeletonizer(
           enabled: isLoading,
           child: Markdown(
-            data: fullResponse,
+            data: fullResponse.isEmpty ? 'Loading...' : fullResponse,
             shrinkWrap: true,
             styleSheet: MarkdownStyleSheet.fromTheme(
               Theme.of(context),

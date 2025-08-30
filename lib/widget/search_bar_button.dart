@@ -4,7 +4,16 @@ import 'package:flutter/material.dart';
 class SearchBarButton extends StatefulWidget {
   final IconData icon;
   final String text;
-  const SearchBarButton({super.key, required this.icon, required this.text});
+  final GestureTapCallback onTap;
+  final bool isLoading;
+
+  const SearchBarButton({
+    super.key,
+    required this.icon,
+    required this.text,
+    required this.onTap,
+    this.isLoading = false,
+  });
 
   @override
   State<SearchBarButton> createState() => _SearchBarButtonState();
@@ -12,6 +21,7 @@ class SearchBarButton extends StatefulWidget {
 
 class _SearchBarButtonState extends State<SearchBarButton> {
   bool isHover = false;
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -31,12 +41,35 @@ class _SearchBarButtonState extends State<SearchBarButton> {
           borderRadius: BorderRadius.circular(6),
           color: isHover ? AppColors.proButton : Colors.transparent,
         ),
-        child: Row(
-          children: [
-            Icon(widget.icon, color: AppColors.iconGrey),
-            const SizedBox(width: 8),
-            Text(widget.text, style: TextStyle(color: AppColors.textGrey)),
-          ],
+        child: GestureDetector(
+          onTap: widget.isLoading ? null : widget.onTap,
+          child: Row(
+            children: [
+              if (widget.isLoading)
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.iconGrey,
+                    ),
+                  ),
+                )
+              else
+                Icon(widget.icon, color: AppColors.iconGrey),
+              const SizedBox(width: 8),
+              Text(
+                widget.text,
+                style: TextStyle(
+                  color:
+                      widget.isLoading
+                          ? AppColors.textGrey.withValues(alpha: 0.6)
+                          : AppColors.textGrey,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

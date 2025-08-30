@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:ai_search/pages/chat_page.dart';
+import 'package:ai_search/pages/mcp_chat_page.dart';
 import 'package:ai_search/services/chat_web_service.dart';
+import 'package:ai_search/services/agent_service.dart';
 import 'package:ai_search/themes/colors.dart';
 import 'package:ai_search/widget/search_bar_button.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +17,80 @@ class SearchSection extends StatefulWidget {
 }
 
 class _SearchSectionState extends State<SearchSection> {
-  final queryController = TextEditingController();
+  final TextEditingController queryController = TextEditingController();
+  final ChatWebService chatService = ChatWebService();
+  final AgentService agentService = AgentService();
+  bool isAgentMode = false;
+  StreamSubscription? _agentSubscription;
+  bool _isAgentInitializing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    chatService.connect();
+
+    // Listen to agent responses
+    _agentSubscription = chatService.agentResponseStream.listen((response) {
+      // Handle agent responses here if needed
+      print('Agent response: $response');
+    });
+  }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    _agentSubscription?.cancel();
+    agentService.dispose();
     super.dispose();
-    queryController.dispose();
+  }
+
+  void _activateAgentMode() async {
+    setState(() {
+      _isAgentInitializing = true;
+    });
+
+    try {
+      // Connect to MCP server
+      await agentService.initialize();
+
+      // Listen to agent responses
+      _agentSubscription = chatService.agentResponseStream.listen((response) {
+        // Handle real-time agent responses if needed
+        print('Agent response: $response');
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🤖 Agent mode activated!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Failed to connect to agent: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() {
+        isAgentMode = false;
+      });
+    } finally {
+      setState(() {
+        _isAgentInitializing = false;
+      });
+    }
+  }
+
+  void _deactivateAgentMode() {
+    _agentSubscription?.cancel();
+    agentService.dispose();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('🔌 Agent mode deactivated'),
+        backgroundColor: Colors.blue,
+      ),
+    );
   }
 
   @override
@@ -70,11 +141,55 @@ class _SearchSectionState extends State<SearchSection> {
                     SearchBarButton(
                       icon: Icons.auto_awesome_outlined,
                       text: 'Focus',
+                      onTap: () {},
                     ),
                     const SizedBox(width: 12),
                     SearchBarButton(
                       icon: Icons.add_circle_outline,
                       text: 'Attach',
+                      onTap: () {},
+                    ),
+                    // Updated Agent button with MCP functionality
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder:
+                                (context) => MCPChatPage(
+                                  question: queryController.text.trim(),
+                                ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.searchBar,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.searchBarBorder),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.handshake,
+                              size: 16,
+                              color: AppColors.textGrey,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Agent',
+                              style: GoogleFonts.ibmPlexMono(
+                                fontSize: 12,
+                                color: AppColors.textGrey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     const Spacer(),
                     GestureDetector(

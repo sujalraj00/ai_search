@@ -38,6 +38,13 @@ dependencies:
   web_socket_client: ^0.2.1
   flutter_markdown_plus: ^1.0.3
   skeletonizer: ^1.4.3
+  http: ^1.2.2
+  web_socket_channel: ^2.4.0
+  flutter_client_sse: ^2.0.3
+  google_generative_ai: ^0.4.3
+  flutter_dotenv: ^6.0.0
+  sse: ^4.1.8
+
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +69,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/.env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
