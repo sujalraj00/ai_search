@@ -12,4 +12,11 @@ class AppColors {
   static const cardColor = Color(0xFF262626);
   static const submitButton = Color.fromRGBO(27, 185, 206, 1);
   static const whiteColor = Colors.white;
+
+  // Additional Perplexity-style colors
+  static const messageBubble = Color(0xFF2A2A2A);
+  static const userMessageBubble = Color(0xFF1E1E1E);
+  static const accentBlue = Color(0xFF007AFF);
+  static const subtleBorder = Color(0xFF404040);
+  static const hoverColor = Color(0xFF3A3A3A);
 }

@@ -3,7 +3,6 @@ import 'package:ai_search/services/agent_service.dart';
 import 'package:ai_search/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class AnswerSection extends StatefulWidget {
   final bool isAgentMode;
@@ -24,7 +23,6 @@ class AnswerSection extends StatefulWidget {
 class _AnswerSectionState extends State<AnswerSection> {
   String fullResponse = '';
   bool isLoading = true;
-  bool _isAgentProcessing = false;
 
   @override
   void initState() {
@@ -52,7 +50,6 @@ class _AnswerSectionState extends State<AnswerSection> {
     if (widget.agentService == null) return;
 
     setState(() {
-      _isAgentProcessing = true;
       isLoading = true;
     });
 
@@ -63,13 +60,11 @@ class _AnswerSectionState extends State<AnswerSection> {
       setState(() {
         fullResponse = response;
         isLoading = false;
-        _isAgentProcessing = false;
       });
     } catch (e) {
       setState(() {
         fullResponse = "Sorry, I encountered an error: $e";
         isLoading = false;
-        _isAgentProcessing = false;
       });
     }
   }
@@ -80,11 +75,11 @@ class _AnswerSectionState extends State<AnswerSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.isAgentMode ? 'AI Agent Response' : 'Perplexity',
+          widget.isAgentMode ? 'AI Agent Response' : 'Result',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 16),
-        if (widget.isAgentMode && _isAgentProcessing)
+        if (isLoading)
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -105,28 +100,33 @@ class _AnswerSectionState extends State<AnswerSection> {
                 ),
                 SizedBox(width: 16),
                 Text(
-                  'AI Agent is processing your request...',
+                  'Loading...',
                   style: TextStyle(fontSize: 16, color: AppColors.textGrey),
                 ),
               ],
             ),
           ),
-        Skeletonizer(
-          enabled: isLoading,
-          child: Markdown(
-            data: fullResponse.isEmpty ? 'Loading...' : fullResponse,
-            shrinkWrap: true,
-            styleSheet: MarkdownStyleSheet.fromTheme(
-              Theme.of(context),
-            ).copyWith(
-              codeblockDecoration: BoxDecoration(
-                color: AppColors.cardColor,
-                borderRadius: BorderRadius.circular(10),
+        if (!isLoading && fullResponse.isNotEmpty)
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.cardColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Markdown(
+              data: fullResponse,
+              shrinkWrap: true,
+              styleSheet: MarkdownStyleSheet.fromTheme(
+                Theme.of(context),
+              ).copyWith(
+                codeblockDecoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                code: const TextStyle(fontSize: 16),
               ),
-              code: const TextStyle(fontSize: 16),
             ),
           ),
-        ),
       ],
     );
   }

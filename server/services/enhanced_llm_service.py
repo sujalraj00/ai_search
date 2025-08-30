@@ -36,16 +36,41 @@ class EnhancedLLMService:
             # Extract content and post to Twitter
             content = self._extract_tweet_content(query)
             if content:
-                yield f"📝 Content to tweet: '{content}'\n\n"
+                # Generate a better tweet using Gemini
+                full_prompt = f"""
+                Create a concise, engaging tweet about: {query}
+                Keep it under 280 characters and make it interesting for Twitter.
+                Think and reason deeply and provide a comprehensive, detailed, well-cited accurate response using the above context.
+                Return only the tweet text, nothing else.
+                """
                 
-                # Call the Twitter tool directly
-                result = await self.mcp_server.call_tool("createPost", {"status": content})
-                
-                if result.get("content"):
-                    result_text = result["content"][0].get("text", "")
-                    yield f"✅ {result_text}\n"
-                else:
-                    yield "✅ Tweet posted successfully!\n"
+                try:
+                    # Generate the tweet content using Gemini
+                    response = self.model.generate_content(full_prompt)
+                    tweet_text = response.text if response.text else content
+                    
+                    yield f"📝 Content to tweet: '{tweet_text}'\n\n"
+                    
+                    # Call the Twitter tool directly with the extracted text
+                    result = await self.mcp_server.call_tool("createPost", {"status": tweet_text})
+                    
+                    if result.get("content"):
+                        result_text = result["content"][0].get("text", "")
+                        yield f"✅ {result_text}\n"
+                    else:
+                        yield "✅ Tweet posted successfully!\n"
+                        
+                except Exception as e:
+                    yield f"❌ Error generating tweet content: {str(e)}\n"
+                    # Fallback to original content
+                    yield f"📝 Using extracted content: '{content}'\n\n"
+                    
+                    result = await self.mcp_server.call_tool("createPost", {"status": content})
+                    if result.get("content"):
+                        result_text = result["content"][0].get("text", "")
+                        yield f"✅ {result_text}\n"
+                    else:
+                        yield "✅ Tweet posted successfully!\n"
             else:
                 yield "❌ Could not extract content to tweet. Please specify what you want to post.\n"
             return
@@ -62,7 +87,8 @@ class EnhancedLLMService:
             r"post\s+(?:on\s+)?twitter\s*[:\-]?\s*['\"]?(.*?)['\"]?$", 
             r"share\s+(?:on\s+)?twitter\s*[:\-]?\s*['\"]?(.*?)['\"]?$",
             r"twitter\s+post\s*[:\-]?\s*['\"]?(.*?)['\"]?$",
-            r"make\s+a\s+post\s+on\s+twitter\s*[:\-]?\s*['\"]?(.*?)['\"]?$"
+            r"make\s+a\s+post\s+on\s+twitter\s*[:\-]?\s*['\"]?(.*?)['\"]?$",
+            r"create\s+a\s+post\s+on\s+twitter\s*[:\-]?\s*['\"]?(.*?)['\"]?$"
         ]
         
         query_clean = query.strip()
@@ -80,7 +106,7 @@ class EnhancedLLMService:
             return quoted_match.group(1)
         
         # As a fallback, remove common command words and return the rest
-        command_words = ['tweet', 'post', 'share', 'twitter', 'on', 'this', ':', '-', 'make', 'a']
+        command_words = ['tweet', 'post', 'share', 'twitter', 'on', 'this', ':', '-', 'make', 'a', 'create']
         words = query_clean.split()
         filtered_words = [word for word in words if word.lower() not in command_words]
         

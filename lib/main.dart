@@ -8,7 +8,7 @@ void main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
+  // Load environment variable
   try {
     await dotenv.load(fileName: "assets/.env");
     print('Environment variables loaded successfully');

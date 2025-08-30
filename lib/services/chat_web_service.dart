@@ -9,6 +9,7 @@ class ChatWebService {
 
   WebSocket? _webSocket;
   MCPClient? _mcpClient;
+
   factory ChatWebService() => _instance;
   ChatWebService._internal();
 
@@ -23,16 +24,26 @@ class ChatWebService {
       _agentResponseController.stream;
 
   void connect() {
-    _webSocket = WebSocket(Uri.parse("ws://localhost:8000/ws/chat"));
+    if (_webSocket != null) return;
 
-    _webSocket!.messages.listen((message) {
-      final data = json.decode(message);
-      if (data["type"] == "search_result") {
-        _searchResultController.add(data);
-      } else if (data["type"] == "content") {
-        _contentController.add(data);
-      }
-    });
+    try {
+      _webSocket = WebSocket(Uri.parse("ws://localhost:8000/ws/chat"));
+
+      _webSocket!.messages.listen((message) {
+        try {
+          final data = json.decode(message);
+          if (data["type"] == "search_result") {
+            _searchResultController.add(data);
+          } else if (data["type"] == "content") {
+            _contentController.add(data);
+          }
+        } catch (e) {
+          print('Error parsing WebSocket message: $e');
+        }
+      });
+    } catch (e) {
+      print('Failed to connect to WebSocket: $e');
+    }
   }
 
   void connectToMcpAgent() {
@@ -59,7 +70,17 @@ class ChatWebService {
   }
 
   void chat(String query) {
-    _webSocket!.send(json.encode({"query": query}));
+    if (_webSocket == null) {
+      connect();
+    }
+
+    try {
+      if (_webSocket != null) {
+        _webSocket!.send(json.encode({"query": query}));
+      }
+    } catch (e) {
+      print('Error sending message: $e');
+    }
   }
 
   Future<void> chatWithAgent(String query) async {
