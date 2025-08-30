@@ -3,10 +3,12 @@ import 'package:ai_search/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:admanager_web/admanager_web.dart';
 
 void main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
+  AdManagerWeb.init();
 
   // Load environment variable
   try {

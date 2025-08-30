@@ -1,3 +1,4 @@
+import 'package:admanager_web/admanager_web.dart';
 import 'package:ai_search/services/chat_web_service.dart';
 import 'package:ai_search/themes/colors.dart';
 import 'package:ai_search/widget/search_section.dart';
@@ -34,6 +35,15 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   //search bar
                   Expanded(child: SearchSection()),
+                  SizedBox(height: 16),
+                  kIsWeb
+                      ? AdBlock(
+                        size: [
+                          AdBlockSize.largeRectangle,
+                        ], // Other sizes available
+                        adUnitId: "3424311963", // Replace with your ad unit ID
+                      )
+                      : SizedBox(),
 
                   // footer
                   Container(

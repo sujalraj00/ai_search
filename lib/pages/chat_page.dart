@@ -1,3 +1,4 @@
+import 'package:admanager_web/admanager_web.dart';
 import 'package:ai_search/themes/colors.dart';
 import 'package:ai_search/widget/safe_source_section.dart';
 import 'package:ai_search/widget/side_nav_bar.dart';
@@ -128,12 +129,15 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: AppColors.background,
+
       body: Row(
         children: [
           kIsWeb ? SideNavBar() : SizedBox(),
-          kIsWeb ? SizedBox(width: 100) : SizedBox(),
+          kIsWeb ? SizedBox(width: 50) : SizedBox(),
           Expanded(
             child: Column(
               children: [
@@ -141,6 +145,8 @@ class _ChatPageState extends State<ChatPage> {
                 // Chat messages with Perplexity-style design
                 Expanded(
                   child: Container(
+                    width: width * 0.6,
+                    //height: height,
                     padding: EdgeInsets.symmetric(horizontal: 32.0),
                     child: ListView.builder(
                       controller: _scrollController,
@@ -317,7 +323,7 @@ class _ChatPageState extends State<ChatPage> {
                               Container(
                                 margin: EdgeInsets.symmetric(
                                   horizontal: 32.0,
-                                  vertical: 16.0,
+                                  vertical: 13.0,
                                 ),
                                 child: SourcesSection(
                                   sources: message.sources ?? [],
@@ -334,9 +340,12 @@ class _ChatPageState extends State<ChatPage> {
 
                 // Search bar at the bottom
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 32.0,
-                    vertical: 20.0,
+                  width: width * 0.6,
+                  padding: EdgeInsets.only(
+                    left: 32.0,
+                    right: 30.0,
+                    top: 8.0,
+                    bottom: 15.0,
                   ),
                   child: Container(
                     decoration: BoxDecoration(
@@ -387,7 +396,7 @@ class _ChatPageState extends State<ChatPage> {
                               // Focus button
                               MouseRegion(
                                 cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
+                                child: InkWell(
                                   onTap: () {},
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
@@ -426,7 +435,7 @@ class _ChatPageState extends State<ChatPage> {
                               // Send button
                               MouseRegion(
                                 cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
+                                child: InkWell(
                                   onTap: _sendMessage,
                                   child: Container(
                                     padding: EdgeInsets.all(10),
@@ -453,7 +462,15 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
           // Right side space for ads
-          kIsWeb ? SizedBox(width: 300) : SizedBox(),
+          kIsWeb
+              ? Container(
+                width: width * 0.3,
+                child: AdBlock(
+                  size: [AdBlockSize.largeRectangle], // Other sizes available
+                  adUnitId: "3424311963", // Replace with your ad unit ID
+                ),
+              )
+              : SizedBox(),
         ],
       ),
     );

@@ -135,7 +135,7 @@ class SourcesSection extends StatelessWidget {
     final displaySources =
         isLoading && sources.isEmpty
             ? List.generate(
-              3,
+              5,
               (_) => {
                 'title': 'Loading...',
                 'description': '...',
