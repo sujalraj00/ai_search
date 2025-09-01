@@ -33,10 +33,7 @@ class _MCPChatPageState extends State<MCPChatPage> {
     try {
       final mcpClient = MCPClient();
 
-      final geminiService = GeminiService(
-        apiKey:
-            'AIzaSyDJaB2NNUe1sf1-3AGIzNLwR65NbIZBCB0', // Replace with your API key
-      );
+      final geminiService = GeminiService(apiKey: '');
 
       mcpChatService = MCPChatService(
         mcpClient: mcpClient,

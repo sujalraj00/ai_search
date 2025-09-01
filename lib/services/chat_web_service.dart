@@ -83,39 +83,39 @@ class ChatWebService {
     }
   }
 
-  Future<void> chatWithAgent(String query) async {
-    if (_mcpClient == null) {
-      connectToMcpAgent();
-      // Wait a bit for connection to establish
-      await Future.delayed(Duration(seconds: 1));
-    }
+  // Future<void> chatWithAgent(String query) async {
+  //   if (_mcpClient == null) {
+  //     connectToMcpAgent();
+  //     // Wait a bit for connection to establish
+  //     await Future.delayed(Duration(seconds: 1));
+  //   }
 
-    // Send query to MCP agent via separate HTTP endpoint
-    // You'll need to create this endpoint in your MCP server
-    try {
-      final response = await http.post(
-        Uri.parse('https://mcp-x-server.onrender.com/message'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'type': 'user_query',
-          'content': query,
-          'timestamp': DateTime.now().toIso8601String(),
-        }),
-      );
+  //   // Send query to MCP agent via separate HTTP endpoint
+  //   // You'll need to create this endpoint in your MCP server
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse('https://mcp-x-server.onrender.com/message'),
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: json.encode({
+  //         'type': 'user_query',
+  //         'content': query,
+  //         'timestamp': DateTime.now().toIso8601String(),
+  //       }),
+  //     );
 
-      if (response.statusCode != 200) {
-        throw Exception(
-          'Failed to send message to MCP: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error sending message to MCP: $e');
-      _agentResponseController.add({
-        'type': 'error',
-        'content': 'Failed to send message: $e',
-      });
-    }
-  }
+  //     if (response.statusCode != 200) {
+  //       throw Exception(
+  //         'Failed to send message to MCP: ${response.statusCode}',
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print('Error sending message to MCP: $e');
+  //     _agentResponseController.add({
+  //       'type': 'error',
+  //       'content': 'Failed to send message: $e',
+  //     });
+  //   }
+  // }
 
   void dispose() {
     _webSocket?.close();

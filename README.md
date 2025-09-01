@@ -61,9 +61,6 @@ The project uses several key packages:
 - **ChatPage**: Displays conversations and responses
 - **SearchSection**: Main search interface with agent button
 
-## MCP Server
-
-The application connects to an MCP server at `https://mcp-x-server.onrender.com` to access various tools and capabilities.
 
 ## Getting Started
 
