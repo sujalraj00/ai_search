@@ -6,17 +6,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:admanager_web/admanager_web.dart';
 
 void main() async {
-  // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
   AdManagerWeb.init();
 
-  // Load environment variable
   try {
     await dotenv.load(fileName: "assets/.env");
     print('Environment variables loaded successfully');
   } catch (e) {
     print('Warning: Could not load .env file: $e');
-    print('Please create a .env file with GEMINI_API_KEY=your_api_key_here');
   }
 
   runApp(const MyApp());
@@ -25,7 +22,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
